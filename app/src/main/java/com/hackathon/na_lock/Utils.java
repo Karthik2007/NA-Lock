@@ -154,4 +154,21 @@ public class Utils {
         return !getApplicationInfo(context, packageName).sourceDir.contains("/data");
     }
 
+    /**
+     * checks whether usage access permission is given to app
+     * @return
+     */
+    public static boolean checkPermission(Context ctx) {
+
+        AppOpsManager appOps = (AppOpsManager) ctx
+                .getSystemService(Context.APP_OPS_SERVICE);
+        int mode = appOps.checkOpNoThrow("android:get_usage_stats",
+                android.os.Process.myUid(), ctx.getPackageName());
+        boolean granted = mode == AppOpsManager.MODE_ALLOWED;
+
+        return granted;
+        //String permission = "android.permission.PACKAGE_USAGE_STATS";
+        //return getPackageManager().checkPermission(permission,getPackageName())== PackageManager.PERMISSION_GRANTED;
+    }
+
 }

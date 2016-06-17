@@ -42,6 +42,8 @@ public class NALockDbHelper extends SQLiteOpenHelper {
                     + NALockDbContract.AppUsageMonitor.COLUMN_NAME_APP_FOREGROUND_TIME
                     + INTEGER_TYPE + COMMA_SEP
                     + NALockDbContract.AppUsageMonitor.COLUMN_NAME_APP_RESTRICTION_TIME
+                    + INTEGER_TYPE + COMMA_SEP
+                    + NALockDbContract.AppUsageMonitor.COLUMN_NAME_ENABLED
                     + INTEGER_TYPE + " )";
 
     private static final String SQL_DELETE_APP_MONITOR =
@@ -93,6 +95,7 @@ public class NALockDbHelper extends SQLiteOpenHelper {
             values.put(NALockDbContract.AppUsageMonitor.COLUMN_NAME_APP_PACKAGE_NAME, app.getPackageName());
             values.put(NALockDbContract.AppUsageMonitor.COLUMN_NAME_APP_FOREGROUND_TIME, app.getForegroundTime());
             values.put(NALockDbContract.AppUsageMonitor.COLUMN_NAME_APP_RESTRICTION_TIME, app.getRestrictionTime());
+            values.put(NALockDbContract.AppUsageMonitor.COLUMN_NAME_ENABLED, app.isRestricted());
 
 
             db.insert(NALockDbContract.AppUsageMonitor.TABLE_NAME, null, values);
@@ -131,7 +134,9 @@ public class NALockDbHelper extends SQLiteOpenHelper {
                             NALockDbContract.AppUsageMonitor.COLUMN_NAME_APP_FOREGROUND_TIME));
                     app.setForegroundTime(foregroundTime);
 
-                    app.setRestricted(true);
+                    int isRestricted = cursor.getInt(cursor.getColumnIndex(
+                            NALockDbContract.AppUsageMonitor.COLUMN_NAME_ENABLED));
+                    app.setRestricted(isRestricted == 1);
 
                     restrictedApps.add(app);
 

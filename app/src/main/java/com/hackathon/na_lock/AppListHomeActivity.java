@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -22,6 +23,7 @@ import android.widget.TextView;
 
 import com.hackathon.na_lock.adapter.AppRecyclerAdapter;
 import com.hackathon.na_lock.databases.NALockDbHelper;
+import com.hackathon.na_lock.listeners.DialogActionListener;
 import com.hackathon.na_lock.pojo.App;
 import com.hackathon.na_lock.services.AppMonitorService;
 import com.hackathon.na_lock.services.ResetForgroundTimeService;
@@ -29,7 +31,7 @@ import com.hackathon.na_lock.services.ResetForgroundTimeService;
 import java.util.Calendar;
 import java.util.List;
 
-public class AppListHomeActivity extends AppCompatActivity {
+public class AppListHomeActivity extends AppCompatActivity implements DialogActionListener {
 
 
     private RecyclerView mRestrictedAppRecycler;
@@ -38,6 +40,8 @@ public class AppListHomeActivity extends AppCompatActivity {
     private List<App> mRestritedAppList;
     private Context mContext;
     private TextView noListMsg;
+
+    DialogFragment mDialogFragment;
 
     private static final String TAG = "AppListHomeActivity";
 
@@ -78,32 +82,23 @@ public class AppListHomeActivity extends AppCompatActivity {
         mRestrictedAppRecycler.setItemAnimator(new DefaultItemAnimator());
         //mRestrictedAppRecycler.setAdapter(mRestrictedAdapter);
 
+        if (!Utils.checkPermission(mContext))
+            showDialog();
 
     }
 
-    public boolean checkPermission() {
 
-        AppOpsManager appOps = (AppOpsManager) mContext
-                .getSystemService(Context.APP_OPS_SERVICE);
-        int mode = appOps.checkOpNoThrow("android:get_usage_stats",
-                android.os.Process.myUid(), mContext.getPackageName());
-        boolean granted = mode == AppOpsManager.MODE_ALLOWED;
-
-        return granted;
-        //String permission = "android.permission.PACKAGE_USAGE_STATS";
-        //return getPackageManager().checkPermission(permission,getPackageName())== PackageManager.PERMISSION_GRANTED;
-    }
 
     @Override
     protected void onResume() {
         super.onResume();
 
+        loadList();
 
-        if (!checkPermission())
-            startActivity(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS));
+
 
         Log.d(TAG, "on Resume ");
-        loadList();
+
 
     }
 
@@ -117,18 +112,37 @@ public class AppListHomeActivity extends AppCompatActivity {
         mRestrictedAdapter = new AppRecyclerAdapter(mRestritedAppList, mContext);
         mRestrictedAppRecycler.setAdapter(mRestrictedAdapter);
 
-        mRestrictedAdapter.SetOnItemClickListener(new AppRecyclerAdapter.OnItemClickListener() {
+        mRestrictedAdapter.setOnItemClickListener(new AppRecyclerAdapter.OnItemClickListener() {
             @Override
-            public void onItemClick(View view, int position) {
-                showSetDurationDialog(position);
+            public void onItemClick(View view, App app) {
+                showSetDurationDialog(app);
             }
         });
     }
 
-    public void showSetDurationDialog(final int position) {
+    void showDialog() {
+         mDialogFragment = NADialogFragment.newInstance(
+                R.string.msg_usage_permission_dialog);
+         mDialogFragment.show(getSupportFragmentManager(), "dialog");
+    }
+
+    public void doPositiveClick() {
+
+        mDialogFragment.dismiss();
+        startActivity(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS));
+        Log.i("FragmentAlertDialog", "Positive click!");
+    }
+
+    public void doNegativeClick() {
+
+        mDialogFragment.dismiss();
+        Log.i("FragmentAlertDialog", "Negative click!");
+    }
+
+    public void showSetDurationDialog(final App app) {
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(mContext);
 
-        Log.d(TAG, "position " + position);
+        Log.d(TAG, "position " + app.getAppName());
 
         //AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
 
@@ -154,7 +168,7 @@ public class AppListHomeActivity extends AppCompatActivity {
                             long duration = Long.parseLong(input.getText().toString());
                             Log.d(TAG, "duration " + duration);
 
-                            NALockDbHelper.getInstance(mContext).updateAppRestriction(duration * 60 * 1000, mRestritedAppList.get(position).getPackageName());
+                            NALockDbHelper.getInstance(mContext).updateAppRestriction(duration * 60 * 1000,app.getPackageName());
 
                             loadList();
                         }

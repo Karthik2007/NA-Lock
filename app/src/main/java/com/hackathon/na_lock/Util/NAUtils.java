@@ -21,11 +21,17 @@ public class NAUtils {
         List<PackageInfo> packs = context.getPackageManager().getInstalledPackages(0);
         for (int i = 0; i < packs.size(); i++) {
             PackageInfo p = packs.get(i);
-            if (context.getPackageManager().getLaunchIntentForPackage(p.applicationInfo.packageName) != null && (resPackageNames == null || !resPackageNames.contains(p.packageName))) {
+
+
+            if (context.getPackageManager().getLaunchIntentForPackage(p.applicationInfo.packageName) != null
+                    && (resPackageNames == null || !resPackageNames.contains(p.packageName))
+                    && !p.packageName.equals(context.getPackageName())) {
+
                 String appName = p.applicationInfo.loadLabel(context.getPackageManager()).toString();
                 String packageName = p.packageName;
                 Drawable icon = p.applicationInfo.loadIcon(context.getPackageManager());
                 res.add(new App(icon, packageName, appName));
+
             }
         }
         return res;

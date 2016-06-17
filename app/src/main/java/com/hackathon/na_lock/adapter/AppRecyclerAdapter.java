@@ -27,37 +27,35 @@ public class AppRecyclerAdapter extends RecyclerView.Adapter<AppRecyclerAdapter.
     private Context mContext;
     private OnItemClickListener mItemClickListener;
 
-    public class MyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public class MyViewHolder extends RecyclerView.ViewHolder {
         public ImageView icon;
         public TextView appName, duration;
         public Switch mSwitch;
+        public App appItem;
+        public View mView;
 
 
         public MyViewHolder(View view) {
             super(view);
 
+            mView = view;
             icon = (ImageView) view.findViewById(R.id.appIcon);
             appName = (TextView) view.findViewById(R.id.appName);
             mSwitch = (Switch) view.findViewById(R.id.toggle);
             duration = (TextView) view.findViewById(R.id.duration);
-            view.setOnClickListener(this);
+            //view.setOnClickListener(this);
 
         }
 
-        @Override
-        public void onClick(View v) {
 
-            if (mItemClickListener != null)
-                mItemClickListener.onItemClick(v, getPosition());
-        }
     }
 
 
     public interface OnItemClickListener {
-        public void onItemClick(View view, int position);
+        public void onItemClick(View view,App app);
     }
 
-    public void SetOnItemClickListener(final OnItemClickListener mItemClickListener) {
+    public void setOnItemClickListener(final OnItemClickListener mItemClickListener) {
         this.mItemClickListener = mItemClickListener;
     }
 
@@ -81,10 +79,11 @@ public class AppRecyclerAdapter extends RecyclerView.Adapter<AppRecyclerAdapter.
     }
 
     @Override
-    public void onBindViewHolder(MyViewHolder holder, final int position) {
+    public void onBindViewHolder(final MyViewHolder holder, final int position) {
 
         final App app = mAppList.get(position);
 
+        holder.appItem = app;
         holder.appName.setText(app.getAppName());
         if(app.getAppIcon() != null)
             holder.icon.setImageDrawable(app.getAppIcon());
@@ -97,7 +96,7 @@ public class AppRecyclerAdapter extends RecyclerView.Adapter<AppRecyclerAdapter.
             holder.mSwitch.setChecked(false);
         }
 
-        holder.mSwitch.setTag(mAppList.get(position));
+        holder.mSwitch.setTag(app);
 
         holder.mSwitch.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -107,11 +106,26 @@ public class AppRecyclerAdapter extends RecyclerView.Adapter<AppRecyclerAdapter.
 
 
                 if (appToInsert.isRestricted()) {
-                    appToInsert.setRestrictionTime(30 * Utils.MIN_IN_MILLSEC);
-                    appToInsert.setForegroundTime(0);
-                    NALockDbHelper.getInstance(mContext).insertAppForRestriction(appToInsert, mContext);
-                } else
+                    if(!Utils.checkPermission(mContext))
+                        mItemClickListener.onItemClick(v,holder.appItem);
+                    else {
+                        appToInsert.setRestrictionTime(30 * Utils.MIN_IN_MILLSEC);
+                        appToInsert.setForegroundTime(0);
+                        NALockDbHelper.getInstance(mContext).insertAppForRestriction(appToInsert, mContext);
+                    }
+
+                } else{
+                    //here goes the update enabled instead of deleting thee entry
                     NALockDbHelper.getInstance(mContext).deleteApp(appToInsert.getPackageName());
+                }
+            }
+        });
+
+        holder.mView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                mItemClickListener.onItemClick(v,holder.appItem);
             }
         });
 
