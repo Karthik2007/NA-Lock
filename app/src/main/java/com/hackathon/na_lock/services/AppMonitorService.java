@@ -4,9 +4,11 @@ import android.app.ActivityManager;
 import android.app.Service;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
+import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.os.Handler;
@@ -19,6 +21,7 @@ import com.hackathon.na_lock.LockerActivity;
 import com.hackathon.na_lock.Util.NAUtils;
 import com.hackathon.na_lock.databases.NALockDbHelper;
 import com.hackathon.na_lock.pojo.App;
+import com.hackathon.na_lock.receiver.ScreenReceiver;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -38,6 +41,7 @@ public class AppMonitorService extends Service {
     private ActivityManager activityManager;
     String packageName;
     int counter;
+    BroadcastReceiver mReceiver = null;
 
     private void monitorApp() {
 
@@ -54,6 +58,9 @@ public class AppMonitorService extends Service {
 
         timer.schedule(new TimerTask() {
             public void run() {
+
+                if (ScreenReceiver.screenOff)
+                    return;
 
                 Log.i(TAG, "Moniter App TimerTask started.... 1... !");
 
@@ -136,6 +143,13 @@ public class AppMonitorService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        // Register receiver that handles screen on and screen off logic
+        IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
+        filter.addAction(Intent.ACTION_SCREEN_OFF);
+        filter.addAction(Intent.ACTION_USER_PRESENT);
+        mReceiver = new ScreenReceiver();
+        registerReceiver(mReceiver, filter);
     }
 
     @Override
@@ -145,6 +159,14 @@ public class AppMonitorService extends Service {
         try {
             if (timer != null)
                 timer.cancel();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        Log.i("ScreenOnOff", "Service  destroy");
+        try {
+            if (mReceiver != null)
+                unregisterReceiver(mReceiver);
         } catch (Exception e) {
             e.printStackTrace();
         }
