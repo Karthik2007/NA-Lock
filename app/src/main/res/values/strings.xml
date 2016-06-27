@@ -1,6 +1,9 @@
 <resources>
     <string name="app_name">NA-LOCK</string>
     <string name="action_settings">Done</string>
+    <string name="set_duration">Set Time Limit</string>
+    <string name="no_list_message">Add apps to restrict usage</string>
+    <string name="set_duration_hint">Enter Time Limit in Minutes </string>
     <string name="title_activity_main">MainActivity</string>
     <string name="positive_btn_usage_permission">Permit</string>
     <string name="negative_btn_usage_permission">Cancel</string>

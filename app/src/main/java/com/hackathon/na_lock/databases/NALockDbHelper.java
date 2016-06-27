@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import com.hackathon.na_lock.Util.NALog;
 import com.hackathon.na_lock.pojo.App;
 
 import org.json.JSONObject;
@@ -91,25 +92,35 @@ public class NALockDbHelper extends SQLiteOpenHelper {
         try (SQLiteDatabase db = this.getWritableDatabase()) {
             ContentValues values = new ContentValues();
 
-            values.put(NALockDbContract.AppUsageMonitor.COLUMN_NAME_APP_NAME, app.getAppName());
-            values.put(NALockDbContract.AppUsageMonitor.COLUMN_NAME_APP_PACKAGE_NAME, app.getPackageName());
-            values.put(NALockDbContract.AppUsageMonitor.COLUMN_NAME_APP_FOREGROUND_TIME, app.getForegroundTime());
-            values.put(NALockDbContract.AppUsageMonitor.COLUMN_NAME_APP_RESTRICTION_TIME, app.getRestrictionTime());
+
             values.put(NALockDbContract.AppUsageMonitor.COLUMN_NAME_ENABLED, app.isRestricted());
 
+            if(db.update(NALockDbContract.AppUsageMonitor.TABLE_NAME,values,
+                    NALockDbContract.AppUsageMonitor.COLUMN_NAME_APP_PACKAGE_NAME +" =?",new String[]{app.getPackageName()})<1) {
 
-            db.insert(NALockDbContract.AppUsageMonitor.TABLE_NAME, null, values);
+                values.put(NALockDbContract.AppUsageMonitor.COLUMN_NAME_APP_NAME, app.getAppName());
+                values.put(NALockDbContract.AppUsageMonitor.COLUMN_NAME_APP_PACKAGE_NAME, app.getPackageName());
+                values.put(NALockDbContract.AppUsageMonitor.COLUMN_NAME_APP_RESTRICTION_TIME, app.getRestrictionTime());
+                values.put(NALockDbContract.AppUsageMonitor.COLUMN_NAME_APP_FOREGROUND_TIME, app.getForegroundTime());
+                db.insert(NALockDbContract.AppUsageMonitor.TABLE_NAME, null, values);
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     public List<App> getRestrictedApps() {
+
+        NALog.d(TAG, "gettting enabled restricted apps");
         List<App> restrictedApps = new ArrayList<App>();
         Cursor cursor = null;
         try (SQLiteDatabase db = this.getWritableDatabase()) {
 
-            cursor = db.rawQuery("SELECT * FROM " + NALockDbContract.AppUsageMonitor.TABLE_NAME, null);
+            cursor = db.query(NALockDbContract.AppUsageMonitor.TABLE_NAME,null,null,null,null,null,
+                    NALockDbContract.AppUsageMonitor.COLUMN_NAME_ENABLED+" DESC");
+           /* cursor = db.rawQuery("SELECT * FROM " + NALockDbContract.AppUsageMonitor.TABLE_NAME
+                    +" WHERE "+NALockDbContract.AppUsageMonitor.COLUMN_NAME_ENABLED +" = ?", new String[]{"1"});*/
 
             if (cursor != null && cursor.moveToFirst()) {
 
@@ -152,11 +163,14 @@ public class NALockDbHelper extends SQLiteOpenHelper {
     }
 
     public List<String> getRestrictedAppNames() {
+        NALog.d(TAG, "getting enabled restricted app  names");
         List<String> restrictedApps = null;
         Cursor cursor = null;
         try (SQLiteDatabase db = this.getWritableDatabase()) {
 
-            cursor = db.rawQuery("SELECT * FROM " + NALockDbContract.AppUsageMonitor.TABLE_NAME, null);
+            cursor = db.rawQuery("SELECT "+ NALockDbContract.AppUsageMonitor.COLUMN_NAME_APP_PACKAGE_NAME
+                    +" FROM " + NALockDbContract.AppUsageMonitor.TABLE_NAME
+                    +" WHERE "+NALockDbContract.AppUsageMonitor.COLUMN_NAME_ENABLED +" = ?", new String[]{"1"});
 
             if (cursor != null && cursor.moveToFirst()) {
 
@@ -181,7 +195,11 @@ public class NALockDbHelper extends SQLiteOpenHelper {
         return restrictedApps;
     }
 
-
+    /**
+     * get foreground time for particular package
+     * @param packageName
+     * @return
+     */
     public long getForegroundTime(String packageName) {
         Cursor cursor = null;
         try (SQLiteDatabase db = this.getWritableDatabase()) {
@@ -207,6 +225,11 @@ public class NALockDbHelper extends SQLiteOpenHelper {
         return 0L;
     }
 
+    /**
+     * updates the foreground time of apps
+     * @param foregroundTime
+     * @param packageName
+     */
     public void updateAppUsage(long foregroundTime, String packageName) {
 
         Log.d(TAG, "Update usage time");
@@ -235,6 +258,9 @@ public class NALockDbHelper extends SQLiteOpenHelper {
         }
     }
 
+    /**
+     * resets the foreground time of all apps since everyday it has to start fresh
+     */
     public void resetTable() {
         Log.d(TAG, "resting table");
         try (SQLiteDatabase db = this.getWritableDatabase()) {
@@ -247,13 +273,38 @@ public class NALockDbHelper extends SQLiteOpenHelper {
         }
     }
 
-    public void updateAppRestriction(long restrictionTime, String packageName) {
+    /**
+     * updates the change in app restriction time
+     * @param restrictionTime
+     * @param packageName
+     */
+    public void updateAppRestrictionTime(long restrictionTime, String packageName) {
 
         Log.d(TAG, "Update usage time");
         try (SQLiteDatabase db = this.getWritableDatabase()) {
 
             ContentValues values = new ContentValues();
             values.put(NALockDbContract.AppUsageMonitor.COLUMN_NAME_APP_RESTRICTION_TIME, restrictionTime);
+
+            db.update(NALockDbContract.AppUsageMonitor.TABLE_NAME, values, NALockDbContract.AppUsageMonitor.COLUMN_NAME_APP_PACKAGE_NAME + "=?", new String[]{packageName});
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    /**
+     * disables the restriction on the app
+     * @param packageName
+     */
+    public void disableAppRestriction(String packageName) {
+
+        Log.d(TAG, "Update usage time");
+        try (SQLiteDatabase db = this.getWritableDatabase()) {
+
+            ContentValues values = new ContentValues();
+            values.put(NALockDbContract.AppUsageMonitor.COLUMN_NAME_ENABLED, 0);
 
             db.update(NALockDbContract.AppUsageMonitor.TABLE_NAME, values, NALockDbContract.AppUsageMonitor.COLUMN_NAME_APP_PACKAGE_NAME + "=?", new String[]{packageName});
 

@@ -46,9 +46,9 @@ android:layout_below="@+id/res_app_header"
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Add Restricted apps"
+        android:text="@string/no_list_message"
         android:textColor="#AAAAAA"
-        android:textSize="26sp"
+        android:textSize="22sp"
         android:textStyle="italic"
         android:id="@+id/no_list_message"
         android:layout_centerInParent="true" />

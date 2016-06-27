@@ -14,6 +14,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Switch;
+import android.widget.ToggleButton;
 
 import com.hackathon.na_lock.Util.Constants;
 import com.hackathon.na_lock.Util.NAUtils;
@@ -25,65 +26,104 @@ import com.hackathon.na_lock.pojo.App;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AddAppActivity extends AppCompatActivity implements DialogActionListener{
+public class AddAppActivity extends AppCompatActivity implements DialogActionListener {
 
     private static final String TAG = "AddAppActivity";
     private RecyclerView mAppRecyclerView;
     private AppRecyclerAdapter mAdapter;
-    private List<App> mAppList,mAppListOfRestrictedApps;
+    private List<App> mAppList, mAppListOfRestrictedApps;
     private Context mContext;
+    private static App appToInsert;
+    DialogFragment mDialogFragment;
+    private static ToggleButton toggleBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_app);
-
         mContext = this;
-        mAppList = NAUtils.getInstalledApps(mContext);
-        mAppListOfRestrictedApps = new ArrayList<>();
-
-        Log.d(TAG, mAppList.size() + "applist " + mAppList.get(0).getAppName());
-        mAdapter = new AppRecyclerAdapter(mAppList, mContext);
-
-
-
 
         mAppRecyclerView = (RecyclerView) findViewById(R.id.app_list_recyclerView);
+
+
+
+
+
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
         mAppRecyclerView.setLayoutManager(mLayoutManager);
         mAppRecyclerView.setItemAnimator(new DefaultItemAnimator());
-        mAppRecyclerView.setAdapter(mAdapter);
+
     }
 
 
     @Override
     protected void onStart() {
         super.onStart();
-        if(!Utils.checkPermission(mContext)) {
-            mAdapter.setOnItemClickListener(new AppRecyclerAdapter.OnItemClickListener() {
-                @Override
-                public void onItemClick(View view, App app) {
-                    mAppListOfRestrictedApps.add(app);
+
+        mAppList = NAUtils.getInstalledApps(mContext);
+
+
+        Log.d(TAG, mAppList.size() + "applist " + mAppList.get(0).getAppName());
+        mAdapter = new AppRecyclerAdapter(mAppList, mContext);
+
+        mAdapter.setOnItemClickListener(new AppRecyclerAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(View view, App app) {
+                ToggleButton switchBtn = (ToggleButton)view.findViewById(R.id.toggle);
+                if(!switchBtn.isChecked()) {
+                    switchBtn.toggle();
+                    onSwitchClick(switchBtn, app);
+                }else
+                {
+                    NALockDbHelper.getInstance(mContext).disableAppRestriction(app.getPackageName());
+                    app.setRestricted(false);
+                    switchBtn.toggle();
+                }
+            }
+
+            @Override
+            public void onSwitchClick(View view, App app) {
+                ((ToggleButton)view).setChecked(false);
+                if (Utils.checkPermission(mContext)) {
+                    insertAppsToRestrict(app);
+                    ((ToggleButton) view).setChecked(true);
+                } else {
+                    appToInsert = app;
+                    toggleBtn = (ToggleButton)view;
                     showDialog();
                 }
-            });
-        }else
-            mAdapter.setOnItemClickListener(null);
+            }
+        });
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        mAppListOfRestrictedApps = new ArrayList<>();
+
+        mAppRecyclerView.setAdapter(mAdapter);
     }
 
     void showDialog() {
-        DialogFragment newFragment = NADialogFragment.newInstance(
+         mDialogFragment = NADialogFragment.newInstance(
                 R.string.msg_usage_permission_dialog);
-        newFragment.show(getSupportFragmentManager(), "dialog");
+        mDialogFragment.show(getSupportFragmentManager(), "dialog");
     }
 
     public void doPositiveClick() {
-        // Do stuff here.
+        if(mDialogFragment != null)
+            mDialogFragment.dismiss();
         startActivityForResult(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS), Constants.USAGE_PERMISSION_REQ_CODE);
         Log.i("FragmentAlertDialog", "Positive click!");
     }
 
     public void doNegativeClick() {
+        if(mDialogFragment != null)
+            mDialogFragment.dismiss();
+
+        appToInsert = null;
         // Do stuff here.
         Log.i("FragmentAlertDialog", "Negative click!");
     }
@@ -112,34 +152,29 @@ public class AddAppActivity extends AppCompatActivity implements DialogActionLis
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        switch (requestCode){
+        switch (requestCode) {
             case Constants.USAGE_PERMISSION_REQ_CODE:
-                if(mAppListOfRestrictedApps!=null && mAppListOfRestrictedApps.size() > 0 && Utils.checkPermission(mContext))
-                {
-                    App appToInsert = mAppListOfRestrictedApps.get(0);
-                    appToInsert.setRestrictionTime(30 * Utils.MIN_IN_MILLSEC);
-                    appToInsert.setForegroundTime(0);
-                    appToInsert.setRestricted(true);
-                    NALockDbHelper.getInstance(mContext).insertAppForRestriction(appToInsert, mContext);
+                if (appToInsert != null && Utils.checkPermission(mContext)) {
+                    insertAppsToRestrict(appToInsert);
+                    toggleBtn.setChecked(true);
                 }
                 break;
             default:
+                appToInsert = null;
                 break;
 
         }
-        Log.d(TAG,"on Activity result" + requestCode);
+        Log.d(TAG, "on Activity result" + requestCode);
     }
 
 
-    private void insertAppsToRestrict()
-    {
+    private void insertAppsToRestrict(App app) {
 
-        for(App appToInsert : mAppListOfRestrictedApps)
-        {
-            appToInsert.setRestrictionTime(30 * Utils.MIN_IN_MILLSEC);
-            appToInsert.setForegroundTime(0);
-            appToInsert.setRestricted(true);
-            NALockDbHelper.getInstance(mContext).insertAppForRestriction(appToInsert, mContext);
-        }
+        app.setRestrictionTime(30 * Utils.MIN_IN_MILLSEC);
+        app.setForegroundTime(0);
+        app.setRestricted(true);
+        NALockDbHelper.getInstance(mContext).insertAppForRestriction(app, mContext);
+        appToInsert = null;
+
     }
 }

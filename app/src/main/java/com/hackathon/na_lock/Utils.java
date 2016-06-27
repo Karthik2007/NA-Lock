@@ -1,5 +1,6 @@
 package com.hackathon.na_lock;
 
+import android.annotation.TargetApi;
 import android.app.AlarmManager;
 import android.app.AppOpsManager;
 import android.app.PendingIntent;
@@ -9,8 +10,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.util.Log;
 
+import com.hackathon.na_lock.Util.NALog;
 import com.hackathon.na_lock.databases.NALockDbHelper;
 import com.hackathon.na_lock.pojo.App;
 
@@ -160,15 +163,30 @@ public class Utils {
      */
     public static boolean checkPermission(Context ctx) {
 
+        NALog.d(TAG,"checking usage permission");
         AppOpsManager appOps = (AppOpsManager) ctx
                 .getSystemService(Context.APP_OPS_SERVICE);
-        int mode = appOps.checkOpNoThrow("android:get_usage_stats",
+        int mode = appOps.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS,
                 android.os.Process.myUid(), ctx.getPackageName());
         boolean granted = mode == AppOpsManager.MODE_ALLOWED;
 
+        NALog.d(TAG,"granted " +granted);
         return granted;
         //String permission = "android.permission.PACKAGE_USAGE_STATS";
         //return getPackageManager().checkPermission(permission,getPackageName())== PackageManager.PERMISSION_GRANTED;
     }
+
+
+    public static boolean doIHavePermission(Context context){
+
+        final UsageStatsManager usageStatsManager = (UsageStatsManager) context.getSystemService("usagestats");
+        final List<UsageStats> queryUsageStats = usageStatsManager.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, 0,  System.currentTimeMillis());
+        NALog.d(TAG,"do I have permission"+queryUsageStats);
+        NALog.d(TAG,"do I have permission"+!queryUsageStats.isEmpty());
+
+        return !queryUsageStats.isEmpty();
+    }
+
+
 
 }

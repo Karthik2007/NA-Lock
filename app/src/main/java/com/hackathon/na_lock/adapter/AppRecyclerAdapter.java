@@ -1,14 +1,20 @@
 package com.hackathon.na_lock.adapter;
 
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.TouchDelegate;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
+import com.hackathon.na_lock.AppListHomeActivity;
 import com.hackathon.na_lock.R;
 import com.hackathon.na_lock.Util.NAUtils;
 import com.hackathon.na_lock.Utils;
@@ -30,7 +36,7 @@ public class AppRecyclerAdapter extends RecyclerView.Adapter<AppRecyclerAdapter.
     public class MyViewHolder extends RecyclerView.ViewHolder {
         public ImageView icon;
         public TextView appName, duration;
-        public Switch mSwitch;
+        public ToggleButton mSwitch;
         public App appItem;
         public View mView;
 
@@ -41,8 +47,26 @@ public class AppRecyclerAdapter extends RecyclerView.Adapter<AppRecyclerAdapter.
             mView = view;
             icon = (ImageView) view.findViewById(R.id.appIcon);
             appName = (TextView) view.findViewById(R.id.appName);
-            mSwitch = (Switch) view.findViewById(R.id.toggle);
+            mSwitch = (ToggleButton) view.findViewById(R.id.toggle);
             duration = (TextView) view.findViewById(R.id.duration);
+
+           /* Rect delegateArea = new Rect();
+
+            mSwitch.getHitRect(delegateArea);
+
+
+            delegateArea.right += 200;
+            delegateArea.bottom += 200;
+            delegateArea.left += 200;
+            delegateArea.top += 200;
+
+
+            TouchDelegate touchDelegate = new TouchDelegate(delegateArea,
+                    mSwitch);
+
+            if (View.class.isInstance(mSwitch.getParent())) {
+                ((View) mSwitch.getParent()).setTouchDelegate(touchDelegate);
+            }*/
             //view.setOnClickListener(this);
 
         }
@@ -52,7 +76,9 @@ public class AppRecyclerAdapter extends RecyclerView.Adapter<AppRecyclerAdapter.
 
 
     public interface OnItemClickListener {
-        public void onItemClick(View view,App app);
+        void onItemClick(View view,App app);
+        void onSwitchClick(View view,App app);
+
     }
 
     public void setOnItemClickListener(final OnItemClickListener mItemClickListener) {
@@ -62,6 +88,10 @@ public class AppRecyclerAdapter extends RecyclerView.Adapter<AppRecyclerAdapter.
     public AppRecyclerAdapter(List<App> appList, Context context) {
         this.mAppList = appList;
         this.mContext = context;
+    }
+
+    public void setAppList(List<App> mAppList) {
+        this.mAppList = mAppList;
     }
 
     @Override
@@ -85,39 +115,52 @@ public class AppRecyclerAdapter extends RecyclerView.Adapter<AppRecyclerAdapter.
 
         holder.appItem = app;
         holder.appName.setText(app.getAppName());
-        if(app.getAppIcon() != null)
+        if(app.getAppIcon() != null) {
             holder.icon.setImageDrawable(app.getAppIcon());
-        else
-            holder.icon.setVisibility(View.GONE);
+        }
+        else {
+            Drawable icon = null;
+            try {
+                icon = mContext.getPackageManager().getApplicationIcon(app.getPackageName());
+                holder.icon.setImageDrawable(icon);
+            } catch (PackageManager.NameNotFoundException e) {
+                e.printStackTrace();
+                holder.icon.setVisibility(View.GONE);
+            }
+
+
+        }
         if (app.isRestricted()) {
             holder.mSwitch.setChecked(true);
-            holder.duration.setText("Usage Limit: " + NAUtils.convertToMin(app.getRestrictionTime()));
         } else {
             holder.mSwitch.setChecked(false);
         }
+
+        if(mContext instanceof AppListHomeActivity)
+            holder.duration.setText("Usage Limit: " + NAUtils.convertToMin(app.getRestrictionTime()));
 
         holder.mSwitch.setTag(app);
 
         holder.mSwitch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                App appToInsert = (App) v.getTag();
-                appToInsert.setRestricted(((Switch) v).isChecked());
 
-
-                if (appToInsert.isRestricted()) {
-                    if(!Utils.checkPermission(mContext))
-                        mItemClickListener.onItemClick(v,holder.appItem);
-                    else {
-                        appToInsert.setRestrictionTime(30 * Utils.MIN_IN_MILLSEC);
-                        appToInsert.setForegroundTime(0);
-                        NALockDbHelper.getInstance(mContext).insertAppForRestriction(appToInsert, mContext);
-                    }
-
-                } else{
-                    //here goes the update enabled instead of deleting thee entry
-                    NALockDbHelper.getInstance(mContext).deleteApp(appToInsert.getPackageName());
+                if(holder.mSwitch.isChecked())
+                {
+                    holder.mSwitch.setChecked(false);
+                    if (mItemClickListener != null)
+                        mItemClickListener.onSwitchClick(v, holder.appItem);
+                }else {
+                    NALockDbHelper.getInstance(mContext).disableAppRestriction(holder.appItem.getPackageName());
+                    app.setRestricted(false);
+                    //below condition code has to be changed since it is unstable
+                    /*if(mContext instanceof AppListHomeActivity)
+                    {
+                        mAppList.remove(app);
+                        notifyDataSetChanged();
+                    }*/
                 }
+
             }
         });
 
@@ -125,11 +168,20 @@ public class AppRecyclerAdapter extends RecyclerView.Adapter<AppRecyclerAdapter.
             @Override
             public void onClick(View v) {
 
-                mItemClickListener.onItemClick(v,holder.appItem);
+                        if (mItemClickListener != null)
+                            mItemClickListener.onItemClick(v, holder.appItem);
             }
         });
 
 
+    }
+
+    private void addRestrictApp(App appItem) {
+
+        appItem.setRestricted(true);
+        appItem.setRestrictionTime(30 * Utils.MIN_IN_MILLSEC);
+        appItem.setForegroundTime(0);
+        NALockDbHelper.getInstance(mContext).insertAppForRestriction(appItem, mContext);
     }
 
     @Override
