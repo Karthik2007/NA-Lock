@@ -19,6 +19,7 @@ import android.widget.Toast;
 
 import com.hackathon.na_lock.LockerActivity;
 import com.hackathon.na_lock.Util.NAUtils;
+import com.hackathon.na_lock.WarningDialogActivity;
 import com.hackathon.na_lock.databases.NALockDbHelper;
 import com.hackathon.na_lock.pojo.App;
 import com.hackathon.na_lock.receiver.ScreenReceiver;
@@ -76,7 +77,7 @@ public class AppMonitorService extends Service {
                         Intent i = new Intent(AppMonitorService.this,
                                 LockerActivity.class);
 
-                        i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK);
                         startActivity(i);
                     }
                 }
@@ -127,17 +128,30 @@ public class AppMonitorService extends Service {
                     return true;
                 } else if (app.getForegroundTime() == (0.8 * app.getRestrictionTime())) {
                     final long time = app.getForegroundTime();
-                    new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    /*new Handler(Looper.getMainLooper()).post(new Runnable() {
                         @Override
                         public void run() {
                             Toast.makeText(context, "Your usage time is crossed " + NAUtils.convertToMin(time), Toast.LENGTH_LONG).show();
                         }
-                    });
+                    });*/
+
+                    showWarningDialogActivity();
                 }
                 NALockDbHelper.getInstance(context).updateAppUsage(app.getForegroundTime() + 1000, pkgNme);
             }
         }
         return false;
+    }
+
+    /**
+     * show warning dialog to user wnhern 80% of limit is crossed
+     */
+    private void showWarningDialogActivity() {
+        Intent i = new Intent(AppMonitorService.this,
+                WarningDialogActivity.class);
+
+        i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(i);
     }
 
     @Override
@@ -180,28 +194,6 @@ public class AppMonitorService extends Service {
         try {
 
             monitorApp();
-
-//            Notification note = new Notification(android.R.drawable.ic_lock_idle_lock,
-//                    "NA_LOCK App", System.currentTimeMillis());
-//
-//            Intent i = new Intent(Intent.ACTION_MAIN);
-//            i.putExtra("autoLuanch", false);
-//            if (MDM.equals("error"))
-//                i.setClassName("com.dfoeindia.one.master.student",
-//                        "com.dfoeindia.one.master.student.LoginActivity");
-//            else
-//                i.setClassName("com.dfoeindia.one.master.student",
-//                        "com.dfoeindia.one.master.student.HomeScreen");
-//            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-//                    | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-//
-//            PendingIntent pi = PendingIntent.getActivity(this, 0, i, 0);
-//
-//            note.setLatestEventInfo(this, "OneSteadyState", "App is Running",
-//                    pi);
-//            note.flags |= Notification.FLAG_NO_CLEAR;
-//
-//            startForeground(1337, note);
 
             Log.i(TAG, "AppMonitorService :  SERVICE STARTTED ");
         } catch (NullPointerException ex) {

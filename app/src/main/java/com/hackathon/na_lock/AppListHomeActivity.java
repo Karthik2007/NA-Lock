@@ -26,6 +26,7 @@ import android.widget.ToggleButton;
 
 import com.hackathon.na_lock.Util.Constants;
 import com.hackathon.na_lock.Util.NALog;
+import com.hackathon.na_lock.Util.NAUtils;
 import com.hackathon.na_lock.adapter.AppRecyclerAdapter;
 import com.hackathon.na_lock.databases.NALockDbHelper;
 import com.hackathon.na_lock.listeners.DialogActionListener;
@@ -68,7 +69,7 @@ public class AppListHomeActivity extends AppCompatActivity implements DialogActi
         }
         startService(intent);
 
-        setAlarmToResetForegroundTime(mContext);
+        NAUtils.setAlarmToResetForegroundTime(mContext);
 
         mRestrictedAppRecycler = (RecyclerView) findViewById(R.id.restricted_app_list_recyclerView);
         addButton = (FloatingActionButton) findViewById(R.id.fab_add);
@@ -215,32 +216,7 @@ public class AppListHomeActivity extends AppCompatActivity implements DialogActi
         alertDialog.show();
     }
 
-    public void setAlarmToResetForegroundTime(Context context) {
 
-        AlarmManager alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        Intent intent = new Intent(context, ResetForgroundTimeService.class);
-        PendingIntent alarmIntent = PendingIntent.getService(context, 1, intent, 0);
-        Log.d(TAG, "getCalendarSet().getTimeInMillis() is " + getCalendarSet().getTimeInMillis());
-        alarmMgr.setRepeating(AlarmManager.RTC_WAKEUP, getCalendarSet().getTimeInMillis(), 24 * Utils.HOUR_IN_MILLISECONDS, alarmIntent);
-    }
-
-    private Calendar getCalendarSet() {
-        Calendar calNow = Calendar.getInstance();
-        Calendar calSet = (Calendar) calNow.clone();
-
-        //for production
-        calSet.set(Calendar.HOUR_OF_DAY, 0);//00:05AM
-        calSet.set(Calendar.MINUTE, 1);
-        calSet.set(Calendar.SECOND, 0);
-        calSet.set(Calendar.MILLISECOND, 0);
-
-        if (calSet.compareTo(calNow) <= 0) {
-            //Today Set time passed, count to tomorrow
-            calSet.add(Calendar.DATE, 1);
-        }
-
-        return calSet;
-    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {

@@ -6,4 +6,7 @@ package com.hackathon.na_lock.Util;
 public class Constants {
 
     public static final int USAGE_PERMISSION_REQ_CODE = 343;
+
+    public static final String PREF_FILE_NAME = "NA_LOCK";
+    public static final String PREF_LAST_RESET = "last_reset";
 }

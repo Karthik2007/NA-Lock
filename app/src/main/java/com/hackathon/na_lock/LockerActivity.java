@@ -1,14 +1,17 @@
 package com.hackathon.na_lock;
 
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.TextView;
 
 import com.hackathon.na_lock.services.AppMonitorService;
 
-public class LockerActivity extends Activity {
+public class LockerActivity extends AppCompatActivity {
 
     long time;
     public  void setTimer(long time1){
@@ -19,7 +22,24 @@ public class LockerActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Log.d("LockerActvity", "Oncreat");
+
+
+        /*try{
+            getSupportActionBar().hide();
+        }catch (Exception e)
+        {
+            //no action bar
+        }
+
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.app_name)
+                .setMessage(R.string.usage_limit_block_message)
+                .setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialog) {
+                finish();
+            }
+        }).setCancelable(false).create().show();*/
 
     }
 
@@ -31,7 +51,6 @@ public class LockerActivity extends Activity {
     @Override
     protected void onPause() {
         super.onPause();
-        Log.d("LockerActvity", "OnPause");
         finishAndRemoveTask();
 
 
@@ -40,7 +59,6 @@ public class LockerActivity extends Activity {
     @Override
     protected void onStop() {
         super.onStop();
-        Log.d("LockerActvity", "OnStop");
         finishAndRemoveTask();
     }
 

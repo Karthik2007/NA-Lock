@@ -14,7 +14,7 @@ public class NALog {
     private static final boolean INFO = true;
     private static final boolean DEBUG = true;
     private static final boolean ERROR = true;
-    private static final boolean LOGGABLE = true;
+    private static final boolean LOGGABLE = false;
 
 
 

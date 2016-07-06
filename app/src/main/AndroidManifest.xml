@@ -6,8 +6,7 @@
     <uses-permission
         android:name="android.permission.PACKAGE_USAGE_STATS"
         tools:ignore="ProtectedPermissions" />
-
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"></uses-permission>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
@@ -27,8 +26,12 @@
         <activity
             android:name=".LockerActivity"
             android:excludeFromRecents="true"
-            android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/Theme.AppCompat.Translucent"></activity>
+            <!--android:label="@string/app_name"
+            android:theme="@style/AppTheme.NoActionBar" />-->
+
+
+
         <activity
             android:name=".AddAppActivity"
             android:excludeFromRecents="true"
@@ -50,7 +53,6 @@
             <intent-filter android:priority="999">
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.QUICKBOOT_POWERON" />
-
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </receiver>
@@ -60,7 +62,11 @@
             android:exported="true" />
         <service
             android:name=".services.ResetForgroundTimeService"
-            android:exported="false"></service>
+            android:exported="false" />
+
+        <activity
+            android:name=".WarningDialogActivity"
+            android:theme="@style/Theme.AppCompat.Translucent"></activity>
     </application>
 
 </manifest>
