@@ -9,4 +9,6 @@ public class Constants {
 
     public static final String PREF_FILE_NAME = "NA_LOCK";
     public static final String PREF_LAST_RESET = "last_reset";
+    public static final String PREF_PIN_CODE = "random";
+    public static final String PREF_IS_PIN_SET = "is_pin";
 }

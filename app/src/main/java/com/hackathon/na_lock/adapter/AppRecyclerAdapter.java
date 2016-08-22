@@ -1,5 +1,6 @@
 package com.hackathon.na_lock.adapter;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Rect;
@@ -15,6 +16,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
+import com.hackathon.na_lock.AddAppActivity;
 import com.hackathon.na_lock.AppListHomeActivity;
 import com.hackathon.na_lock.R;
 import com.hackathon.na_lock.Util.NAUtils;
@@ -146,12 +148,15 @@ public class AppRecyclerAdapter extends RecyclerView.Adapter<AppRecyclerAdapter.
                 }else {
                     NALockDbHelper.getInstance(mContext).disableAppRestriction(holder.appItem.getPackageName());
                     app.setRestricted(false);
-                    //below condition code has to be changed since it is unstable
-                    /*if(mContext instanceof AppListHomeActivity)
+                    try
                     {
-                        mAppList.remove(app);
-                        notifyDataSetChanged();
-                    }*/
+                        AddAppActivity.selectCount--;
+                        ((AddAppActivity)mContext).invalidateOptionsMenu();
+                    }
+                    catch (Exception e)
+                    {
+
+                    }
                 }
 
             }

@@ -119,4 +119,11 @@ public class NAUtils {
        return context.getSharedPreferences(Constants.PREF_FILE_NAME,Context.MODE_PRIVATE).
                getLong(Constants.PREF_LAST_RESET,0);
     }
+
+
+    public static boolean isPinSet(Context context)
+    {
+        return context.getSharedPreferences(Constants.PREF_FILE_NAME,Context.MODE_PRIVATE).
+                getBoolean(Constants.PREF_IS_PIN_SET,false);
+    }
 }

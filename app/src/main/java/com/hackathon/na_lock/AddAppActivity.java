@@ -1,5 +1,6 @@
 package com.hackathon.na_lock;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.provider.Settings;
@@ -36,6 +37,8 @@ public class AddAppActivity extends AppCompatActivity implements DialogActionLis
     private static App appToInsert;
     DialogFragment mDialogFragment;
     private static ToggleButton toggleBtn;
+    private MenuItem doneItem = null;
+    public static int selectCount = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +46,7 @@ public class AddAppActivity extends AppCompatActivity implements DialogActionLis
         setContentView(R.layout.activity_add_app);
         mContext = this;
 
+        selectCount = 0;
         mAppRecyclerView = (RecyclerView) findViewById(R.id.app_list_recyclerView);
 
 
@@ -75,6 +79,12 @@ public class AddAppActivity extends AppCompatActivity implements DialogActionLis
                     onSwitchClick(switchBtn, app);
                 }else
                 {
+                    --selectCount;
+                    if(selectCount<=0)
+                    {
+
+                        ((Activity)mContext).invalidateOptionsMenu();
+                    }
                     NALockDbHelper.getInstance(mContext).disableAppRestriction(app.getPackageName());
                     app.setRestricted(false);
                     switchBtn.toggle();
@@ -84,6 +94,8 @@ public class AddAppActivity extends AppCompatActivity implements DialogActionLis
             @Override
             public void onSwitchClick(View view, App app) {
                 ((ToggleButton)view).setChecked(false);
+                    ++selectCount;
+                    ((Activity)mContext).invalidateOptionsMenu();
                 if (Utils.checkPermission(mContext)) {
                     insertAppsToRestrict(app);
                     ((ToggleButton) view).setChecked(true);
@@ -131,7 +143,11 @@ public class AddAppActivity extends AppCompatActivity implements DialogActionLis
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        //getMenuInflater().inflate(R.menu.menu_main, menu);//Menu Resource, Menu
+        getMenuInflater().inflate(R.menu.menu_main, menu);//Menu Resource, Menu
+
+        doneItem = menu.findItem(R.id.action_done);
+        doneItem.setVisible(selectCount>0);
+        //this.invalidateOptionsMenu();
         return true;
     }
 
