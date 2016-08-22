@@ -88,12 +88,13 @@ public class NALockDbHelper extends SQLiteOpenHelper {
 
     public void insertAppForRestriction(App app, Context context) {
 
-        Log.d(TAG, "inserting " + app.getPackageName());
+        NALog.d(TAG, "inserting " + app.getPackageName());
         try (SQLiteDatabase db = this.getWritableDatabase()) {
             ContentValues values = new ContentValues();
 
 
             values.put(NALockDbContract.AppUsageMonitor.COLUMN_NAME_ENABLED, app.isRestricted());
+            values.put(NALockDbContract.AppUsageMonitor.COLUMN_NAME_APP_RESTRICTION_TIME,app.getRestrictionTime());
 
             if(db.update(NALockDbContract.AppUsageMonitor.TABLE_NAME,values,
                     NALockDbContract.AppUsageMonitor.COLUMN_NAME_APP_PACKAGE_NAME +" =?",new String[]{app.getPackageName()})<1) {
@@ -112,12 +113,12 @@ public class NALockDbHelper extends SQLiteOpenHelper {
 
     public List<App> getRestrictedApps() {
 
-        NALog.d(TAG, "gettting enabled restricted apps");
+        //NALog.d(TAG, "gettting enabled restricted apps");
         List<App> restrictedApps = new ArrayList<App>();
         Cursor cursor = null;
         try (SQLiteDatabase db = this.getWritableDatabase()) {
 
-            cursor = db.query(NALockDbContract.AppUsageMonitor.TABLE_NAME,null,null,null,null,null,
+            cursor = db.query(NALockDbContract.AppUsageMonitor.TABLE_NAME,null,NALockDbContract.AppUsageMonitor.COLUMN_NAME_ENABLED +" = ?",new String[]{"1"},null,null,
                     NALockDbContract.AppUsageMonitor.COLUMN_NAME_ENABLED+" DESC");
            /* cursor = db.rawQuery("SELECT * FROM " + NALockDbContract.AppUsageMonitor.TABLE_NAME
                     +" WHERE "+NALockDbContract.AppUsageMonitor.COLUMN_NAME_ENABLED +" = ?", new String[]{"1"});*/
@@ -232,7 +233,7 @@ public class NALockDbHelper extends SQLiteOpenHelper {
      */
     public void updateAppUsage(long foregroundTime, String packageName) {
 
-        Log.d(TAG, "Update usage time");
+        NALog.d(TAG, "Update usage time");
         try (SQLiteDatabase db = this.getWritableDatabase()) {
 
             ContentValues values = new ContentValues();
@@ -240,7 +241,7 @@ public class NALockDbHelper extends SQLiteOpenHelper {
 
             int res = db.update(NALockDbContract.AppUsageMonitor.TABLE_NAME, values, NALockDbContract.AppUsageMonitor.COLUMN_NAME_APP_PACKAGE_NAME + "=?", new String[]{packageName});
 
-            Log.d(TAG, "update usage time " + res);
+            NALog.d(TAG, "update usage time " + res);
         } catch (Exception e) {
             Log.d(TAG, "Exception ");
             e.printStackTrace();
@@ -262,7 +263,7 @@ public class NALockDbHelper extends SQLiteOpenHelper {
      * resets the foreground time of all apps since everyday it has to start fresh
      */
     public void resetTable() {
-        Log.d(TAG, "resting table");
+        NALog.d(TAG, "reseting table");
         try (SQLiteDatabase db = this.getWritableDatabase()) {
             ContentValues values = new ContentValues();
             values.put(NALockDbContract.AppUsageMonitor.COLUMN_NAME_APP_FOREGROUND_TIME, 0);

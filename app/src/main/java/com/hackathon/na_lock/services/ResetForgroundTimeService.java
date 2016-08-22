@@ -5,9 +5,12 @@ import android.content.Intent;
 import android.content.Context;
 
 import com.hackathon.na_lock.Util.Constants;
+import com.hackathon.na_lock.Util.NALog;
 import com.hackathon.na_lock.databases.NALockDbHelper;
 
 public class ResetForgroundTimeService extends IntentService {
+
+    private static final String TAG = "ResetForgroundTimeService";
 
     public ResetForgroundTimeService() {
         super("ResetForgroundTimeService");
@@ -15,6 +18,7 @@ public class ResetForgroundTimeService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
+        NALog.d(TAG,"started");
         if (intent != null) {
             resetForgroundTimeService();
             setLastResetTime();
@@ -23,7 +27,7 @@ public class ResetForgroundTimeService extends IntentService {
 
     private void setLastResetTime() {
         getSharedPreferences(Constants.PREF_FILE_NAME,MODE_PRIVATE).edit().
-                putLong(Constants.PREF_LAST_RESET,System.currentTimeMillis());
+                putLong(Constants.PREF_LAST_RESET,System.currentTimeMillis()).commit();
     }
 
     private void resetForgroundTimeService() {

@@ -131,7 +131,7 @@ public class AddAppActivity extends AppCompatActivity implements DialogActionLis
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);//Menu Resource, Menu
+        //getMenuInflater().inflate(R.menu.menu_main, menu);//Menu Resource, Menu
         return true;
     }
 

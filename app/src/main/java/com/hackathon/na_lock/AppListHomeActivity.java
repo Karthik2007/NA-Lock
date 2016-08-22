@@ -69,7 +69,13 @@ public class AppListHomeActivity extends AppCompatActivity implements DialogActi
         }
         startService(intent);
 
-        NAUtils.setAlarmToResetForegroundTime(mContext);
+
+
+        if(NAUtils.getLastResetTime(mContext) == 0) {
+            NAUtils.setAlarmToResetForegroundTime(mContext);
+            getSharedPreferences(Constants.PREF_FILE_NAME, MODE_PRIVATE).edit().
+                    putLong(Constants.PREF_LAST_RESET, System.currentTimeMillis()).commit();
+        }
 
         mRestrictedAppRecycler = (RecyclerView) findViewById(R.id.restricted_app_list_recyclerView);
         addButton = (FloatingActionButton) findViewById(R.id.fab_add);
@@ -90,9 +96,6 @@ public class AppListHomeActivity extends AppCompatActivity implements DialogActi
         mRestrictedAppRecycler.setLayoutManager(mLayoutManager1);
         mRestrictedAppRecycler.setItemAnimator(new DefaultItemAnimator());
         //mRestrictedAppRecycler.setAdapter(mRestrictedAdapter);
-
-
-
     }
 
 
@@ -123,34 +126,35 @@ public class AppListHomeActivity extends AppCompatActivity implements DialogActi
             mRestrictedAdapter = new AppRecyclerAdapter(mRestritedAppList, mContext);
             mRestrictedAppRecycler.setAdapter(mRestrictedAdapter);
 
-            mRestrictedAdapter.setOnItemClickListener(new AppRecyclerAdapter.OnItemClickListener() {
-                @Override
-                public void onItemClick(View view, App app) {
-                    if(app.isRestricted())
-                        showSetDurationDialog(app);
-                    else
-                        onSwitchClick(view.findViewById(R.id.toggle),app);
-                }
-
-                @Override
-                public void onSwitchClick(View view, App app) {
-
-
-                    if(Utils.checkPermission(mContext)) {
-                        insertAppsToRestrict(app);
-                        app.setRestricted(true);
-                        ((ToggleButton)view).setChecked(true);
-                    }
-                    else{
-                        toggleBtn = (ToggleButton)view;
-                        appToInsert = app;
-                        showDialog();
-                    }
-                }
-            });
+            mRestrictedAdapter.setOnItemClickListener(mAdapterListener);
         }
     }
 
+
+    private AppRecyclerAdapter.OnItemClickListener mAdapterListener = new AppRecyclerAdapter.OnItemClickListener() {
+        @Override
+        public void onItemClick(View view, App app) {
+            if(app.isRestricted())
+                showSetDurationDialog(app,true,null);
+            else
+                showSetDurationDialog(app,false,view.findViewById(R.id.toggle));
+                //onSwitchClick(view.findViewById(R.id.toggle),app);
+        }
+
+        @Override
+        public void onSwitchClick(View view, App app) {
+            if(Utils.checkPermission(mContext)) {
+                insertAppsToRestrict(app);
+                app.setRestricted(true);
+                ((ToggleButton)view).setChecked(true);
+            }
+            else{
+                toggleBtn = (ToggleButton)view;
+                appToInsert = app;
+                showDialog();
+            }
+        }
+    };
     void showDialog() {
         showedDialog = true;
          mDialogFragment = NADialogFragment.newInstance(
@@ -174,7 +178,7 @@ public class AppListHomeActivity extends AppCompatActivity implements DialogActi
         Log.i("FragmentAlertDialog", "Negative click!");
     }
 
-    public void showSetDurationDialog(final App app) {
+    public void showSetDurationDialog(final App app, final boolean isRestricted , final View toggleView) {
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(mContext);
 
         Log.d(TAG, "position " + app.getAppName());
@@ -202,9 +206,16 @@ public class AppListHomeActivity extends AppCompatActivity implements DialogActi
                             long duration = Long.parseLong(input.getText().toString());
                             Log.d(TAG, "duration " + duration);
 
-                            NALockDbHelper.getInstance(mContext).updateAppRestrictionTime(duration * 60 * 1000,app.getPackageName());
+                            if(isRestricted) {
+                                NALockDbHelper.getInstance(mContext).updateAppRestrictionTime(duration *Utils.MIN_IN_MILLSEC, app.getPackageName());
+                                loadList();
+                            }
+                            else {
+                                app.setRestrictionTime(duration*Utils.MIN_IN_MILLSEC);
+                                mAdapterListener.onSwitchClick(toggleView,app);
+                            }
 
-                            loadList();
+
                         }
                     }
                 });
@@ -215,7 +226,6 @@ public class AppListHomeActivity extends AppCompatActivity implements DialogActi
         // Showing Alert Message
         alertDialog.show();
     }
-
 
 
     @Override
@@ -252,11 +262,13 @@ public class AppListHomeActivity extends AppCompatActivity implements DialogActi
 
     private void insertAppsToRestrict(App appToInsert) {
 
-        appToInsert.setRestrictionTime(30 * Utils.MIN_IN_MILLSEC);
+        if(appToInsert.getRestrictionTime() == 0)
+            appToInsert.setRestrictionTime(30 * Utils.MIN_IN_MILLSEC);
+        //NALog.d(TAG,"restriction time ", appToInsert.getRestrictionTime());
         appToInsert.setForegroundTime(0);
         appToInsert.setRestricted(true);
         NALockDbHelper.getInstance(mContext).insertAppForRestriction(appToInsert, mContext);
-        //loadList();
+        loadList();
        // mRestrictedAdapter.notifyDataSetChanged();
 
     }

@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">NA-LOCK</string>
     <string name="action_settings">Done</string>
-    <string name="set_duration">Set Time Limit</string>
+    <string name="set_duration">Update Time Limit</string>
     <string name="no_list_message">Add apps to restrict usage</string>
     <string name="usage_limit_warn_message">Your usage has crossed more than 80% of usage time limit today</string>
     <string name="usage_limit_block_message">Your usage has crossed time limit today</string>

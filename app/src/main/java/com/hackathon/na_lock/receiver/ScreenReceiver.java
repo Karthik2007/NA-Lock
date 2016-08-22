@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
+import com.hackathon.na_lock.Util.NALog;
 import com.hackathon.na_lock.services.AppMonitorService;
 
 /**
@@ -12,12 +13,13 @@ import com.hackathon.na_lock.services.AppMonitorService;
  */
 public class ScreenReceiver extends BroadcastReceiver {
 
+    private static final String TAG = "ScreenReceiver";
     public static boolean screenOff = false;
 
     @Override
     public void onReceive(Context context, Intent intent) {
 
-        System.out.println("onReceive ");
+        NALog.d(TAG,"onReceive screen ");
         if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
             screenOff = true;
             Log.v("SCREEN", "SCREEN TURNED OFF on BroadcastReceiver");

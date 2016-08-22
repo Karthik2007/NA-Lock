@@ -61,11 +61,13 @@ public class NAUtils {
 
     public static void setAlarmToResetForegroundTime(Context context) {
 
+
+        NALog.d(TAG,"setting alarm for reset");
         AlarmManager alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 
-        Log.d(TAG, "getCalendarSet().getTimeInMillis() is " + getCalendarSet().getTimeInMillis());
+        NALog.d(TAG, "getCalendarSet().getTimeInMillis() is " + getCalendarSet().getTimeInMillis());
         alarmMgr.setRepeating(AlarmManager.RTC_WAKEUP,
-                getCalendarSet().getTimeInMillis(), 24 * Utils.HOUR_IN_MILLISECONDS, getResetAlarmIntent(context));
+                getCalendarSet().getTimeInMillis(), Utils.DAY_IN_MILLISECONDS, getResetAlarmIntent(context));
     }
 
 
@@ -83,7 +85,7 @@ public class NAUtils {
         Calendar calSet = (Calendar) calNow.clone();
 
         //for production
-        calSet.set(Calendar.HOUR_OF_DAY, 0);//00:05AM
+        calSet.set(Calendar.HOUR_OF_DAY, 0);//00:01AM
         calSet.set(Calendar.MINUTE, 1);
         calSet.set(Calendar.SECOND, 0);
         calSet.set(Calendar.MILLISECOND, 0);
@@ -94,6 +96,21 @@ public class NAUtils {
         }
 
         return calSet;
+    }
+
+    /**
+     * get the last passed 12 o clock time in millisecs
+     * @return millisecs
+     */
+    public static long getLast12CalendarSet() {
+        Calendar cal12 = Calendar.getInstance();
+
+
+        cal12.set(Calendar.HOUR_OF_DAY, 0);//00:01AM
+        cal12.set(Calendar.MINUTE, 1);
+        cal12.set(Calendar.SECOND, 0);
+        cal12.set(Calendar.MILLISECOND, 0);
+        return cal12.getTimeInMillis();
     }
 
 

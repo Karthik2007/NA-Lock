@@ -5,6 +5,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.support.v7.widget.RecyclerView;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.TouchDelegate;
 import android.view.View;
@@ -33,7 +34,7 @@ public class AppRecyclerAdapter extends RecyclerView.Adapter<AppRecyclerAdapter.
     private Context mContext;
     private OnItemClickListener mItemClickListener;
 
-    public class MyViewHolder extends RecyclerView.ViewHolder {
+    public class MyViewHolder extends RecyclerView.ViewHolder implements View.OnCreateContextMenuListener {
         public ImageView icon;
         public TextView appName, duration;
         public ToggleButton mSwitch;
@@ -50,25 +51,17 @@ public class AppRecyclerAdapter extends RecyclerView.Adapter<AppRecyclerAdapter.
             mSwitch = (ToggleButton) view.findViewById(R.id.toggle);
             duration = (TextView) view.findViewById(R.id.duration);
 
-           /* Rect delegateArea = new Rect();
+          // mView.setOnCreateContextMenuListener(this);
 
-            mSwitch.getHitRect(delegateArea);
-
-
-            delegateArea.right += 200;
-            delegateArea.bottom += 200;
-            delegateArea.left += 200;
-            delegateArea.top += 200;
+        }
 
 
-            TouchDelegate touchDelegate = new TouchDelegate(delegateArea,
-                    mSwitch);
+        @Override
+        public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
 
-            if (View.class.isInstance(mSwitch.getParent())) {
-                ((View) mSwitch.getParent()).setTouchDelegate(touchDelegate);
-            }*/
-            //view.setOnClickListener(this);
-
+            //menu.setHeaderTitle("Select The Action");
+            menu.add(0, v.getId(), 0, " Delete");//groupId, itemId, order, title
+            // menu.add(0, v.getId(), 0, "SMS");
         }
 
 
@@ -170,6 +163,14 @@ public class AppRecyclerAdapter extends RecyclerView.Adapter<AppRecyclerAdapter.
 
                         if (mItemClickListener != null)
                             mItemClickListener.onItemClick(v, holder.appItem);
+            }
+        });
+
+        holder.mView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                v.setBackgroundColor(mContext.getResources().getColor(R.color.colorOverlayBackground));
+                return false;
             }
         });
 

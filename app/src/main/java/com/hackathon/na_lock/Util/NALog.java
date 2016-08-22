@@ -14,7 +14,7 @@ public class NALog {
     private static final boolean INFO = true;
     private static final boolean DEBUG = true;
     private static final boolean ERROR = true;
-    private static final boolean LOGGABLE = false;
+    private static final boolean LOGGABLE = true;
 
 
 
@@ -58,7 +58,7 @@ public class NALog {
         if (!logFile.exists()) {
             try {
                 logFile.createNewFile();
-            } catch (IOException e) {
+            } catch (Exception e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
@@ -69,7 +69,7 @@ public class NALog {
             buf.append(text);
             buf.newLine();
             buf.close();
-        } catch (IOException e) {
+        } catch (Exception e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
