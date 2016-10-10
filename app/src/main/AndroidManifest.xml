@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.hackathon.na_lock">
+    package="com.ayuthaezhuthu.apptimelock">
 
     <uses-permission
         android:name="android.permission.PACKAGE_USAGE_STATS"
-        tools:ignore="ProtectedPermissions" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+        tools:ignore="ProtectedPermissions" /><!--
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />-->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
@@ -15,15 +15,16 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
+        android:name=".AppTimeLock"
         >
         <activity
-            android:name=".AppListHomeActivity"
+            android:name="com.ayuthaezhuthu.apptimelock.AppListHomeActivity"
+            android:launchMode="singleTask"
             android:excludeFromRecents="true"
             android:screenOrientation="portrait"/>
         <activity
-            android:name=".LockerActivity"
+            android:name="com.ayuthaezhuthu.apptimelock.LockerActivity"
             android:excludeFromRecents="true"
-
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.Translucent" />
         <!--
@@ -32,14 +33,14 @@
         -->
 
         <activity
-            android:name=".AddAppActivity"
+            android:name="com.ayuthaezhuthu.apptimelock.AddAppActivity"
             android:excludeFromRecents="true"
 
             android:screenOrientation="portrait"
             android:label="@string/app_name" />
 
         <service
-            android:name=".services.AppMonitorService"
+            android:name="com.ayuthaezhuthu.apptimelock.services.AppMonitorService"
             android:enabled="true">
             <intent-filter>
                 <action android:name="com.dfoeindia.one.steadystate.AppMonitorService" />
@@ -47,7 +48,7 @@
         </service>
 
         <receiver
-            android:name=".receiver.StartServiceAtBootReceiver"
+            android:name="com.ayuthaezhuthu.apptimelock.receiver.StartServiceAtBootReceiver"
             android:enabled="true"
             android:exported="true"
             android:label="StartServiceAtBootReceiver"
@@ -61,20 +62,21 @@
         </receiver>
 
         <service
-            android:name=".AppUsageCollectionJobService"
+            android:name="com.ayuthaezhuthu.apptimelock.AppUsageCollectionJobService"
             android:exported="true" />
         <service
-            android:name=".services.ResetForgroundTimeService"
+            android:name="com.ayuthaezhuthu.apptimelock.services.ResetForgroundTimeService"
             android:exported="false" />
 
         <activity
-            android:name=".WarningDialogActivity"
+            android:name="com.ayuthaezhuthu.apptimelock.WarningDialogActivity"
 
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.Translucent" />
         <activity
-            android:name=".SplashActivity"
+            android:name="com.ayuthaezhuthu.apptimelock.SplashActivity"
             android:screenOrientation="portrait"
+            android:noHistory="true"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreen">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -82,9 +84,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".pinlock.SetPinHelperActivity"
-            android:screenOrientation="portrait"/>
-        <activity android:name=".pinlock.ConfirmPinHelperActivity"
+
+        <activity android:name="com.ayuthaezhuthu.apptimelock.CustomPinActivity"
             android:screenOrientation="portrait"></activity>
     </application>
 
