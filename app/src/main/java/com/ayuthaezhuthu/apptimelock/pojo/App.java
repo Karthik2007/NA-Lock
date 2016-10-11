@@ -12,6 +12,7 @@ public class App {
     private Drawable appIcon;
     private long foregroundTime;
     private long restrictionTime;
+    private long totForegroundTime;
     private boolean isRestricted;
 
     public App() {

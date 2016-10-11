@@ -176,7 +176,10 @@ public class AppListHomeActivity extends AppCompatActivity implements DialogActi
     }
 
     public void showSetDurationDialog(final App app, final boolean isRestricted , final View toggleView) {
+
+
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(mContext);
+
 
         Log.d(TAG, "position " + app.getAppName());
 
@@ -188,7 +191,8 @@ public class AppListHomeActivity extends AppCompatActivity implements DialogActi
 
         alertDialog.setCancelable(true);
 
-        final EditText input = (EditText) view.findViewById(R.id.duration);
+        final EditText inputHr = (EditText) view.findViewById(R.id.duration_hr);
+        final EditText inputMin = (EditText) view.findViewById(R.id.duration_min);
 
         // Setting Icon to Dialog
         //alertDialog.setIcon(R.drawable.key);
@@ -199,16 +203,26 @@ public class AppListHomeActivity extends AppCompatActivity implements DialogActi
                     public void onClick(DialogInterface dialog, int which) {
                         // Write your code here to execute after dialog
 
-                        if (input.getText().toString().length() > 0) {
-                            long duration = Long.parseLong(input.getText().toString());
-                            Log.d(TAG, "duration " + duration);
+                        long durationHr = 0;
+                        long durationMin = 0;
+                        if (inputHr.getText().toString().length() > 0) {
+                            durationHr = Long.parseLong(inputHr.getText().toString());
+                        }
+                        if (inputMin.getText().toString().length() > 0) {
+                            durationMin = Long.parseLong(inputMin.getText().toString());
+                        }
 
+                        if(durationHr>0 || durationMin>0)
+                        {
+
+
+                            long duration = durationHr*Utils.HOUR_IN_MILLISECONDS + durationMin * Utils.MINUTES_IN_MILLISECONDS;
                             if(isRestricted) {
-                                NALockDbHelper.getInstance(mContext).updateAppRestrictionTime(duration *Utils.MIN_IN_MILLSEC, app.getPackageName());
+                                NALockDbHelper.getInstance(mContext).updateAppRestrictionTime(duration, app.getPackageName());
                                 loadList();
                             }
                             else {
-                                app.setRestrictionTime(duration*Utils.MIN_IN_MILLSEC);
+                                app.setRestrictionTime(duration);
                                 mAdapterListener.onSwitchClick(toggleView,app);
                             }
 

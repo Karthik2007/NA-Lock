@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/white">
 
@@ -16,19 +16,54 @@
         android:text="@string/set_duration"
         android:id="@+id/textView" />
 
-    <EditText
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:inputType="number"
+        android:layout_below="@+id/textView"
+        android:orientation="horizontal"
         android:layout_marginTop="20dp"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
-        android:backgroundTint="@android:color/darker_gray"
-        android:hint="@string/set_duration_hint"
-        android:ems="10"
-        android:maxLength="3"
-        android:id="@+id/duration"
-        android:layout_gravity="center_horizontal" />
+        android:weightSum="4">
+
+        <EditText
+            android:layout_width="0dp"
+            android:layout_weight="1.1"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:backgroundTint="@android:color/darker_gray"
+            android:ems="10"
+            android:maxLength="1"
+            android:id="@+id/duration_hr" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorPrimary"
+            android:text="@string/hour"
+            android:gravity="center"
+            android:id="@+id/hr"
+            android:layout_weight=".7" />
+
+        <EditText
+            android:layout_width="0dp"
+            android:layout_weight="1.1"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:backgroundTint="@android:color/darker_gray"
+            android:ems="10"
+            android:maxLength="2"
+            android:id="@+id/duration_min" />
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/mins"
+            android:textColor="@color/colorPrimary"
+            android:gravity="center"
+            android:id="@+id/min"
+            android:layout_weight=".7" />
+    </LinearLayout>
+
 
    <!-- <Button
         android:layout_width="wrap_content"
@@ -37,4 +72,4 @@
         android:id="@+id/setBtn"
         android:background="@android:color/transparent"
         android:layout_gravity="right" />-->
-</LinearLayout>
+</RelativeLayout>

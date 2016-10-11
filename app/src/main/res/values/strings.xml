@@ -5,7 +5,7 @@
     <string name="no_list_message">Add apps to restrict usage</string>
     <string name="usage_limit_warn_message">Your usage has crossed more than 80% of usage time limit today</string>
     <string name="usage_limit_block_message">App usage has crossed time limit today</string>
-    <string name="set_duration_hint">Enter Time Limit in Minutes </string>
+    <string name="set_hr_duration_hint">max 9 hrs</string>
     <string name="title_activity_main">MainActivity</string>
     <string name="positive_btn_usage_permission">Permit</string>
     <string name="neutral_btn_text">OK</string>
@@ -17,5 +17,9 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_activity_warning_dialog">WarningDialogActivity</string>
 
+
+    //duration units
+    <string name="hour">hr(s)</string>
+    <string name="mins">min(s)</string>
 
 </resources>
