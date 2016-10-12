@@ -32,53 +32,34 @@ public class SplashActivity extends PinActivity {
 
         if(NAUtils.isPinSet(mContext))
         {
-            SPLASH_TIME_OUT = 0;
+            startPinCreation();
         }
-
-
-        new Handler().postDelayed(new Runnable() {
+        else {
+            new Handler().postDelayed(new Runnable() {
 
             /*
-             * Showing splash screen with a timer. This will be useful when you
-             * want to show case your app logo / company
+             * Showing splash screen with a timer.
              */
 
-            @Override
-            public void run() {
-
-                LockManager<CustomPinActivity> lockManager = LockManager.getInstance();
-                if(!lockManager.getAppLock().isPasscodeSet())
-                {
-                    Intent intent = new Intent(mContext, CustomPinActivity.class);
-                    intent.putExtra(AppLock.EXTRA_TYPE, AppLock.ENABLE_PINLOCK);
-                    startActivityForResult(intent, SET_PIN_REQ);
+                @Override
+                public void run() {
+                    startPinCreation();
                 }
-
-
-
-                /*if(NAUtils.isPinSet(mContext))
-                {
-                    Intent confirmPinIntent = new Intent(SplashActivity.this, ConfirmPinHelperActivity.class);
-                    startActivityForResult(confirmPinIntent,CONFIRM_PIN_REQ);
-                }
-                else
-                {
-                    Intent setPinIntent = new Intent(SplashActivity.this, SetPinHelperActivity.class);
-                    startActivityForResult(setPinIntent,SET_PIN_REQ);
-                }*/
-
-
-               /* // This method will be executed once the timer is over
-                // Start your app main activity
-                Intent i = new Intent(SplashActivity.this, AppListHomeActivity.class);
-                startActivity(i);
-
-                // close this activity
-                finish();*/
-            }
-        }, SPLASH_TIME_OUT);
+            }, SPLASH_TIME_OUT);
+        }
     }
 
+
+    private void startPinCreation()
+    {
+        LockManager<CustomPinActivity> lockManager = LockManager.getInstance();
+        if(!lockManager.getAppLock().isPasscodeSet())
+        {
+            Intent intent = new Intent(mContext, CustomPinActivity.class);
+            intent.putExtra(AppLock.EXTRA_TYPE, AppLock.ENABLE_PINLOCK);
+            startActivityForResult(intent, SET_PIN_REQ);
+        }
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {

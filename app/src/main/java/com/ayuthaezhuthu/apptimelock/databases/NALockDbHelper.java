@@ -45,8 +45,25 @@ public class NALockDbHelper extends SQLiteOpenHelper {
                     + NALockDbContract.AppUsageMonitor.COLUMN_NAME_ENABLED
                     + INTEGER_TYPE + " )";
 
+
+
+    private static final String SQL_CREATE_APP_USAGE_ACCUM =
+            "CREATE TABLE IF NOT EXISTS " + NALockDbContract.AppTotalUsageAcc.TABLE_NAME + " ("
+                    + NALockDbContract.AppTotalUsageAcc._ID + INTEGER_TYPE + " PRIMARY KEY"
+                    + COMMA_SEP
+                    + NALockDbContract.AppTotalUsageAcc.COLUMN_NAME_APP_PACKAGE_NAME + TEXT_TYPE
+                    + COMMA_SEP
+                    + NALockDbContract.AppTotalUsageAcc.COLUMN_NAME_APP_FOREGROUND_TIME
+                    + INTEGER_TYPE +COMMA_SEP
+                    + NALockDbContract.AppTotalUsageAcc.COLUMN_NAME_TIME_STAMP
+                    + INTEGER_TYPE + " )";
+
     private static final String SQL_DELETE_APP_MONITOR =
             "DROP TABLE IF EXISTS " + NALockDbContract.AppUsageMonitor.TABLE_NAME;
+
+
+    private static final String SQL_DELETE_APP_USAGE_ACCUM =
+            "DROP TABLE IF EXISTS " + NALockDbContract.AppTotalUsageAcc.TABLE_NAME;
 
     static Object ob = new Object();
     private static NALockDbHelper instance;
@@ -73,13 +90,20 @@ public class NALockDbHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
 
-        db.execSQL(SQL_CREATE_APP_MONITOR);
+        try{
+            db.execSQL(SQL_CREATE_APP_MONITOR);
+            db.execSQL(SQL_CREATE_APP_USAGE_ACCUM);
+        }catch (Exception e)
+        {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 
-        db.execSQL(SQL_DELETE_APP_MONITOR);
+        //db.execSQL(SQL_DELETE_APP_MONITOR);
+        //db.execSQL(SQL_DELETE_APP_USAGE_ACCUM);
 
         onCreate(db);
     }
@@ -261,6 +285,8 @@ public class NALockDbHelper extends SQLiteOpenHelper {
      * resets the foreground time of all apps since everyday it has to start fresh
      */
     public void resetTable() {
+
+        insertUsageTimeToTotTable();
         NALog.d(TAG, "reseting table");
         try (SQLiteDatabase db = this.getWritableDatabase()) {
             ContentValues values = new ContentValues();
@@ -305,11 +331,53 @@ public class NALockDbHelper extends SQLiteOpenHelper {
             ContentValues values = new ContentValues();
             values.put(NALockDbContract.AppUsageMonitor.COLUMN_NAME_ENABLED, 0);
 
-            db.update(NALockDbContract.AppUsageMonitor.TABLE_NAME, values, NALockDbContract.AppUsageMonitor.COLUMN_NAME_APP_PACKAGE_NAME + "=?", new String[]{packageName});
+            db.update(NALockDbContract.AppUsageMonitor.TABLE_NAME, values,
+                    NALockDbContract.AppUsageMonitor.COLUMN_NAME_APP_PACKAGE_NAME + "=?", new String[]{packageName});
 
         } catch (Exception e) {
             e.printStackTrace();
         }
 
+    }
+
+    /**
+     * copy the data from current app monitor table and puts it in total app usage table
+     *
+     */
+    public void insertUsageTimeToTotTable()
+    {
+
+        Cursor cursor = null;
+        try(SQLiteDatabase db = this.getWritableDatabase()){
+
+            cursor = db.query(NALockDbContract.AppUsageMonitor.TABLE_NAME,
+                    new String[]{NALockDbContract.AppUsageMonitor.COLUMN_NAME_APP_PACKAGE_NAME,
+                            NALockDbContract.AppUsageMonitor.COLUMN_NAME_APP_FOREGROUND_TIME},null,null,null,null,null);
+
+            long timeStamp = System.currentTimeMillis();
+
+            if(cursor !=null && cursor.moveToFirst())
+            {
+                do{
+                    ContentValues values = new ContentValues();
+
+                    values.put(NALockDbContract.AppTotalUsageAcc.COLUMN_NAME_APP_PACKAGE_NAME,
+                            cursor.getString(cursor.getColumnIndex(NALockDbContract.AppUsageMonitor.COLUMN_NAME_APP_PACKAGE_NAME)));
+                    values.put(NALockDbContract.AppTotalUsageAcc.COLUMN_NAME_APP_FOREGROUND_TIME,
+                            cursor.getString(cursor.getColumnIndex(NALockDbContract.AppUsageMonitor.COLUMN_NAME_APP_FOREGROUND_TIME)));
+                    values.put(NALockDbContract.AppTotalUsageAcc.COLUMN_NAME_TIME_STAMP,timeStamp);
+
+                    db.insert(NALockDbContract.AppTotalUsageAcc.TABLE_NAME,null,values);
+
+                }while(cursor.moveToNext());
+            }
+
+        }catch (Exception e)
+        {
+            e.printStackTrace();
+        }finally {
+            if(cursor != null)
+                cursor.close();
+        }
     }
 }

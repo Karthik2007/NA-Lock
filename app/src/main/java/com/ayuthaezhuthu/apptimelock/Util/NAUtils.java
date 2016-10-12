@@ -51,13 +51,29 @@ public class NAUtils {
 
         if (millisec >= (60 * 60 * 1000)) {
 
-            time.append("" + millisec / (60 * 60 * 1000) + " hour");
+            time.append("" + millisec / (60 * 60 * 1000) + " hr");
             millisec = millisec%(60*60*1000);
 
         }
 
         if (millisec >= (60 * 1000)) {
-            time.append( " " + millisec / (60 * 1000) + " mins");
+            time.append( " " + millisec / (60 * 1000) + " min");
+        }
+        return time.toString();
+    }
+
+    public static String convertToDurationSummary(long millisec) {
+
+        StringBuilder time = new StringBuilder();
+
+        if (millisec >= (60 * 60 * 1000)) {
+
+            time.append("" + millisec / (60 * 60 * 1000) + " hr");
+            return  time.toString();
+
+        }
+        else if (millisec >= (60 * 1000)) {
+            time.append( "" + millisec / (60 * 1000) + " min");
         }
         return time.toString();
     }
@@ -122,8 +138,8 @@ public static long getLast12CalendarSet() {
 
 public static long getLastResetTime(Context context)
         {
-        return context.getSharedPreferences(Constants.PREF_FILE_NAME,Context.MODE_PRIVATE).
-        getLong(Constants.PREF_LAST_RESET,0);
+            return context.getSharedPreferences(Constants.PREF_FILE_NAME,Context.MODE_PRIVATE).
+                getLong(Constants.PREF_LAST_RESET,0);
         }
 
 

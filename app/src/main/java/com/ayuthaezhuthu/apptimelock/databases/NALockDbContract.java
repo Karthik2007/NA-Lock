@@ -21,4 +21,13 @@ public class NALockDbContract {
         public static final String COLUMN_NAME_ENABLED = "restriction_enabled";
 
     }
+
+    /* Inner class that defines the App total usage table contents */
+    public static abstract class AppTotalUsageAcc implements BaseColumns {
+        public static final String TABLE_NAME = "app_tot_usage_acc";
+        public static final String COLUMN_NAME_APP_PACKAGE_NAME = "package_name";
+        public static final String COLUMN_NAME_APP_FOREGROUND_TIME = "app_foreground_time";
+        public static final String COLUMN_NAME_TIME_STAMP = "usage_time_stamp";
+
+    }
 }

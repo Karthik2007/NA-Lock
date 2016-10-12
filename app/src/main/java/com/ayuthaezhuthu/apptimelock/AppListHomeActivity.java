@@ -23,6 +23,7 @@ import com.ayuthaezhuthu.apptimelock.Util.Constants;
 import com.ayuthaezhuthu.apptimelock.Util.NALog;
 import com.ayuthaezhuthu.apptimelock.Util.NAUtils;
 import com.ayuthaezhuthu.apptimelock.adapter.AppRecyclerAdapter;
+import com.ayuthaezhuthu.apptimelock.adapter.AppRecyclerHomeAdapter;
 import com.ayuthaezhuthu.apptimelock.databases.NALockDbHelper;
 import com.ayuthaezhuthu.apptimelock.listeners.DialogActionListener;
 import com.ayuthaezhuthu.apptimelock.pojo.App;
@@ -33,7 +34,7 @@ import java.util.List;
 public class AppListHomeActivity extends AppCompatActivity implements DialogActionListener {
 
     private RecyclerView mRestrictedAppRecycler;
-    private AppRecyclerAdapter mRestrictedAdapter;
+    private AppRecyclerHomeAdapter mRestrictedAdapter;
     private FloatingActionButton addButton;
     private List<App> mRestritedAppList;
     private Context mContext;
@@ -120,7 +121,7 @@ public class AppListHomeActivity extends AppCompatActivity implements DialogActi
             noListMsg.setVisibility(View.VISIBLE);
         else {
             noListMsg.setVisibility(View.INVISIBLE);
-            mRestrictedAdapter = new AppRecyclerAdapter(mRestritedAppList, mContext);
+            mRestrictedAdapter = new AppRecyclerHomeAdapter(mRestritedAppList, mContext);
             mRestrictedAppRecycler.setAdapter(mRestrictedAdapter);
 
             mRestrictedAdapter.setOnItemClickListener(mAdapterListener);
@@ -128,7 +129,7 @@ public class AppListHomeActivity extends AppCompatActivity implements DialogActi
     }
 
 
-    private AppRecyclerAdapter.OnItemClickListener mAdapterListener = new AppRecyclerAdapter.OnItemClickListener() {
+    private AppRecyclerHomeAdapter.OnItemClickListener mAdapterListener = new AppRecyclerHomeAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(View view, App app) {
             if(app.isRestricted())
