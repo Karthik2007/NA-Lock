@@ -6,4 +6,6 @@
     <color name="colorYellow">#ffff00</color>
     <color name="white">#FFFFFF</color>
     <color name="colorOverlayBackground">#bb666666</color>
+    <color name="dark_grey_color">#ffffff</color>
+
 </resources>

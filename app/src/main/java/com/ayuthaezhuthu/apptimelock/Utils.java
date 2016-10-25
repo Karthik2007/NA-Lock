@@ -1,11 +1,13 @@
 package com.ayuthaezhuthu.apptimelock;
 
+import android.annotation.TargetApi;
 import android.app.AppOpsManager;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.util.Log;
 
 import com.ayuthaezhuthu.apptimelock.Util.NALog;
@@ -33,6 +35,7 @@ public class Utils {
      * @param mContext
      * @return
      */
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public static void getAppUsageStats(Context mContext) {
         long endTime = 0;
         long beginTime = 0;
@@ -120,6 +123,7 @@ public class Utils {
         return false;
     }
 
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private static void getUsageObject(UsageStats usageStatObj, Context mContext) {
         String packageName = usageStatObj.getPackageName();
         try {
@@ -156,15 +160,19 @@ public class Utils {
      */
     public static boolean checkPermission(Context ctx) {
 
-        NALog.d(TAG,"checking usage permission");
-        AppOpsManager appOps = (AppOpsManager) ctx
-                .getSystemService(Context.APP_OPS_SERVICE);
-        int mode = appOps.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS,
-                android.os.Process.myUid(), ctx.getPackageName());
-        boolean granted = mode == AppOpsManager.MODE_ALLOWED;
 
-        NALog.d(TAG,"granted " +granted);
-        return granted;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+            NALog.d(TAG, "checking usage permission");
+            AppOpsManager appOps = (AppOpsManager) ctx
+                    .getSystemService(Context.APP_OPS_SERVICE);
+            int mode = appOps.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS,
+                    android.os.Process.myUid(), ctx.getPackageName());
+            boolean granted = mode == AppOpsManager.MODE_ALLOWED;
+
+            NALog.d(TAG, "granted " + granted);
+            return granted;
+        }else
+            return true;
         //String permission = "android.permission.PACKAGE_USAGE_STATS";
         //return getPackageManager().checkPermission(permission,getPackageName())== PackageManager.PERMISSION_GRANTED;
     }
@@ -172,12 +180,15 @@ public class Utils {
 
     public static boolean doIHavePermission(Context context){
 
-        final UsageStatsManager usageStatsManager = (UsageStatsManager) context.getSystemService("usagestats");
-        final List<UsageStats> queryUsageStats = usageStatsManager.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, 0,  System.currentTimeMillis());
-        NALog.d(TAG,"do I have permission"+queryUsageStats);
-        NALog.d(TAG,"do I have permission"+!queryUsageStats.isEmpty());
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+            final UsageStatsManager usageStatsManager = (UsageStatsManager) context.getSystemService("usagestats");
+            final List<UsageStats> queryUsageStats = usageStatsManager.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, 0, System.currentTimeMillis());
+            NALog.d(TAG, "do I have permission" + queryUsageStats);
+            NALog.d(TAG, "do I have permission" + !queryUsageStats.isEmpty());
 
-        return !queryUsageStats.isEmpty();
+            return !queryUsageStats.isEmpty();
+        }else
+            return true;
     }
 
 

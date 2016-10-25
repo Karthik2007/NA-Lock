@@ -28,7 +28,7 @@ public class AppUsageCollectionTask extends AsyncTask<Object, Void, Boolean> {
         mContext = (Context) params[0];
         if (mContext != null) {
 
-            Utils.getAppUsageStats(mContext);
+            //Utils.getAppUsageStats(mContext);
         } else {
             return false;
         }

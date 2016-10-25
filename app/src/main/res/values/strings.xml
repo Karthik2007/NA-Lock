@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">AppTime Lock</string>
     <string name="action_settings">Done</string>
+    <string name="action_search">Search</string>
     <string name="set_duration">Update Time Limit</string>
     <string name="no_list_message">Add apps to restrict usage</string>
     <string name="usage_limit_warn_message">Your usage has crossed more than 80% of usage time limit today</string>
@@ -13,10 +14,13 @@
     <string name="msg_usage_permission_dialog">You must permit usage access for AppTIME Lock to use
         the features. Please click permit and find AppTime Lock in the list and turn it ON.</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_activity_warning_dialog">WarningDialogActivity</string>
 
+    //notification texts
+    <string name="notif_title">AppLock alert</string>
+    <string name="notif_text_part_1">You are using </string>
+    <string name="notif_text_part_2"> for more than 1 hour today</string>
 
     //duration units
     <string name="hour">hr(s)</string>

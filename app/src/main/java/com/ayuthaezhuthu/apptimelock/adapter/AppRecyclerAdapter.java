@@ -20,6 +20,7 @@ import com.ayuthaezhuthu.apptimelock.Utils;
 import com.ayuthaezhuthu.apptimelock.databases.NALockDbHelper;
 import com.ayuthaezhuthu.apptimelock.pojo.App;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -178,6 +179,8 @@ public class AppRecyclerAdapter extends RecyclerView.Adapter<AppRecyclerAdapter.
 
     }
 
+
+
     private void addRestrictApp(App appItem) {
 
         appItem.setRestricted(true);
@@ -193,5 +196,11 @@ public class AppRecyclerAdapter extends RecyclerView.Adapter<AppRecyclerAdapter.
             return mAppList.size();
         else
             return 0;
+    }
+
+    public void setFilter(List<App> appList) {
+        mAppList = new ArrayList<>();
+        mAppList.addAll(appList);
+        notifyDataSetChanged();
     }
 }

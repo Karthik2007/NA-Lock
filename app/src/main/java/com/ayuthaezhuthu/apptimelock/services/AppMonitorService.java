@@ -5,6 +5,7 @@ import android.app.Service;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -15,9 +16,14 @@ import android.os.IBinder;
 import android.util.Log;
 
 import com.ayuthaezhuthu.apptimelock.LockerActivity;
+import com.ayuthaezhuthu.apptimelock.R;
+import com.ayuthaezhuthu.apptimelock.Util.NAUtils;
+import com.ayuthaezhuthu.apptimelock.Utils;
 import com.ayuthaezhuthu.apptimelock.WarningDialogActivity;
 import com.ayuthaezhuthu.apptimelock.databases.NALockDbHelper;
+import com.ayuthaezhuthu.apptimelock.notification.NotificationGenerator;
 import com.ayuthaezhuthu.apptimelock.pojo.App;
+import com.ayuthaezhuthu.apptimelock.pojo.NANotification;
 import com.ayuthaezhuthu.apptimelock.receiver.ScreenReceiver;
 
 import java.text.DateFormat;
@@ -112,9 +118,13 @@ public class AppMonitorService extends Service {
                 }
             }
         } else {
-            ActivityManager am = (ActivityManager) this.getSystemService(Context.ACTIVITY_SERVICE);
-            List<ActivityManager.RunningAppProcessInfo> tasks = am.getRunningAppProcesses();
-            currentApp = tasks.get(0).processName;
+
+            ActivityManager am = (ActivityManager) this.getSystemService(ACTIVITY_SERVICE);
+            @SuppressWarnings("deprecation")
+            List<ActivityManager.RunningTaskInfo> taskInfo = am.getRunningTasks(1);
+            Log.d("topActivity", "CURRENT Activity ::" + taskInfo.get(0).topActivity.getClassName());
+            ComponentName componentInfo = taskInfo.get(0).topActivity;
+            currentApp = componentInfo.getPackageName();
         }
 
         Log.e("adapter", "Current App in foreground is: " + currentApp);
@@ -141,6 +151,13 @@ public class AppMonitorService extends Service {
                     });*/
 
                     showWarningDialogActivity();
+                }else if(app.getForegroundTime() == Utils.HOUR_IN_MILLISECONDS)
+                {
+                    String title = getResources().getString(R.string.notif_title);
+                    String desc = getResources().getString(R.string.notif_text_part_1)+" "+
+                            Utils.getApplicationInfo(context,pkgNme).name + " "+getResources().getString(R.string.notif_text_part_2);
+
+                    new NotificationGenerator(new NANotification(title,desc),context).show();
                 }
                 NALockDbHelper.getInstance(context).updateAppUsage(app.getForegroundTime() + 1000, pkgNme);
             }

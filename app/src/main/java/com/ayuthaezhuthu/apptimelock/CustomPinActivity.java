@@ -1,7 +1,10 @@
 package com.ayuthaezhuthu.apptimelock;
 
 import android.content.Intent;
+import android.graphics.Color;
+import android.widget.TextView;
 
+import com.github.omadahealth.typefaceview.TypefaceTextView;
 import com.github.orangegangsters.lollipin.lib.managers.AppLockActivity;
 
 /**
@@ -29,5 +32,15 @@ public class CustomPinActivity extends AppLockActivity {
     @Override
     public int getContentView() {
         return R.layout.activity_pin_custom;
+    }
+
+    @Override
+    protected void onResume() {
+
+        TypefaceTextView text = (TypefaceTextView)findViewById(R.id.keyboard_button_textview);
+        text.setTextColor(Color.WHITE);
+        super.onResume();
+
+
     }
 }
